@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  api1
+
+  This template deploys API1 and its associated API Gateway instance.  Outputs
+  are used for the BasePathMappings in Mapping1
+
+Parameters:
+  Stage:
+    Type: String
+    Default: Prod
+    Description: "Enter your stage to deploy"
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  API1Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: api1/
+      Handler: app.lambda_handler
+      Runtime: python3.6
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /api1
+            Method: get
+            RestApiId:
+              API1Gateway
+
+  API1Gateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Stage
+      EndpointConfiguration: REGIONAL
+
+  LambdaFunction1Perms:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - API1Gateway
+      - API1Function
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref API1Function
+      Principal: apigateway.amazonaws.com
+
+Outputs:
+  API1GWId:
+    Description: "API Gateway ID for API 1"
+    Value: !Ref API1Gateway
+    Export:
+      Name: API1GWId
+  API1GWStage:
+    Description: "API Gateway stage for API 1"
+    Value: !Ref Stage
+    Export:
+      Name: API1GWStage
+  API1Function:
+    Description: "API 1 Lambda Function ARN"
+    Value: !GetAtt API1Function.Arn
+  API1FunctionRole:
+    Description: "Implicit IAM Role created for API 2"
+    Value: !GetAtt API1FunctionRole.Arn

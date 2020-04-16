@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  api2
+
+  This template deploys API2 and its associated API Gateway instance.  Outputs
+  are used for the BasePathMappings in Mapping2
+
+Parameters:
+  Stage:
+    Type: String
+    Default: Prod
+    Description: "Enter your stage to deploy"
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  API2Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: api2/
+      Handler: app.lambda_handler
+      Runtime: python3.6
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /api2
+            Method: get
+            RestApiId:
+              API2Gateway
+
+  API2Gateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Stage
+      EndpointConfiguration: REGIONAL
+
+  LambdaFunction2Perms:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - API2Gateway
+      - API2Function
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref API2Function
+      Principal: apigateway.amazonaws.com
+
+Outputs:
+  API2GWId:
+    Description: "API Gateway ID for API 2"
+    Value: !Ref API2Gateway
+    Export:
+      Name: API2GWId
+  API2GWStage:
+    Description: "API Gateway stage for API 2"
+    Value: !Ref Stage
+    Export:
+      Name: API2GWStage
+  API2Function:
+    Description: "API 2 Lambda Function ARN"
+    Value: !GetAtt API2Function.Arn
+  API2FunctionRole:
+    Description: "Implicit IAM Role created for API 2"
+    Value: !GetAtt API2FunctionRole.Arn

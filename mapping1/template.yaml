@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  mapping1
+
+  SAM template for BasePathMapping for API 1 in API Gateway Custom Domain.  It uses
+  the outputs from the API1 and TopLevel templates.
+
+Parameters:
+  TopLevel:
+    Description: "Stack for Custom Domain Name in API Gateway"
+    Type: String
+    Default: "toplevel"
+  Path1:
+    Description: "BasePath for API function 1"
+    Type: String
+    Default: "api1"
+
+
+Resources:
+  API1Mapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      BasePath: !Ref Path1
+      DomainName: !ImportValue APIGWCustomDomainName
+      RestApiId: !ImportValue API1GWId
+      Stage: !ImportValue API1GWStage

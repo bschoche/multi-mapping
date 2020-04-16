@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  top-level
+
+  This is the topp-level SAM project.  It's current form only performs
+  adding the Custom Domain Name under API Gateway.  It can be expanded to
+  include the Route53 DNS entries and Certificate Manager portions, as well.
+  Also, please note this is for a REGIONAL deployment.
+
+Parameters:
+  CustomAPIDomainName:
+    Type: String
+    Default: "a.sample.domain"
+    Description: "Enter your Custom Domain Name for API Gateway"
+  CertificateArn:
+    Type: String
+    Default: "arn:aws:acm:[region]:[account]:certificate/[cert]"
+    Description: "Enter your ARN for your certificate"
+
+Resources:
+  myCustomDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !Ref CustomAPIDomainName
+      RegionalCertificateArn: !Ref CertificateArn
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+Outputs:
+  RegionalDomainName:
+    Value: !GetAtt myCustomDomain.RegionalDomainName
+    Description: "Custom Domain Name"
+  RegionalHostedZoneId:
+    Value: !GetAtt myCustomDomain.RegionalHostedZoneId
+    Description: "Hosted Zone Id"
+  CustomDomainName:
+    Value: !Ref CustomAPIDomainName
+    Description: "Custom Domain Name for API Gateway"
+    Export:
+      Name: APIGWCustomDomainName
